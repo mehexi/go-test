@@ -7,17 +7,14 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-func HandleRoutes(app fiber.App) {
+func TaskRoutes(app fiber.App) {
 	api := app.Group("/api")
-
-	api.Get("/login", handlers.Login)
-	api.Post("/register", handlers.Register)
 
 	api.Get("/", handlers.Root)
 
 	api.Use("/task", middleware.AuthRequired)
 	api.Get("/task", handlers.GetTasks)
 	api.Post("/task", handlers.AddTask)
-	api.Delete("/task", handlers.DeleteTask)
+	api.Delete("/task/:id", handlers.DeleteTask)
 	api.Patch("/task/:id", handlers.EditTask)
 }

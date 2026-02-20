@@ -13,7 +13,8 @@ func main() {
 	db.Migrate()
 	app := fiber.New()
 
-	routes.HandleRoutes(*app)
+	routes.UserRoutes(*app)
+	routes.TaskRoutes(*app)
 
 	log.Fatal(app.Listen(":3000"))
 

@@ -41,13 +41,14 @@ func AddTask(c fiber.Ctx) error {
 
 func DeleteTask(c fiber.Ctx) error {
 	tasks := new(models.Task)
-	idStr := c.Query("id")
+	idStr := c.Params("id")
+	userID := c.Locals("user_id").(uint)
 
 	if idStr == "" {
 		return ErrorResponse(c, "No Query is provided ")
 	}
 
-	result := db.DB.Delete(tasks, idStr)
+	result := db.DB.Where("id = ? AND user_id = ?", idStr, userID).Delete(tasks, idStr)
 
 	if result.Error != nil {
 		return ErrorResponse(c, "Failed to delete Task")
@@ -62,19 +63,26 @@ func DeleteTask(c fiber.Ctx) error {
 
 func EditTask(c fiber.Ctx) error {
 	idStr := c.Params("id")
+	userID := c.Locals("user_id").(uint)
 	id, err := strconv.ParseUint(idStr, 10, 32)
+
 	if err != nil {
 		return ErrorResponse(c, "invalid id")
 	}
+
 	var task models.Task
-	if err := db.DB.First(&task, id).Error; err != nil {
+
+	if err := db.DB.Where("id = ? AND user_id = ?", id, userID).First(&task, id).Error; err != nil {
 		return ErrorResponse(c, "Task not found")
 	}
+
 	if err := c.Bind().Form(&task); err != nil {
 		return ErrorResponse(c, "invalid reqest body")
 	}
-	if err := db.DB.Save(&task).Error; err != nil {
+
+	if err := db.DB.Where("id = ? AND user_id= ?", id, userID).Save(&task).Error; err != nil {
 		return ErrorResponse(c, "Couldnt update the task")
 	}
+
 	return SuccessResponse(c, "task updated", task)
 }
